@@ -85,7 +85,12 @@ class TaskControllerIntegrationTests {
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/tasks/{id}", taskId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("TASK_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Task with id " + taskId + " was not found"))
+                .andExpect(jsonPath("$.path").value("/api/tasks/" + taskId));
     }
 
     @Test
@@ -102,7 +107,27 @@ class TaskControllerIntegrationTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Request validation failed"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.path").value("/api/tasks"))
                 .andExpect(jsonPath("$.fieldErrors.title").value("Title must not be blank"));
+    }
+
+    @Test
+    void returnsConsistentErrorForMalformedRequestBody() throws Exception {
+        mockMvc.perform(post("/api/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Prepare interview",
+                                  "dueDate": "not-a-date"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Request body is invalid"))
+                .andExpect(jsonPath("$.path").value("/api/tasks"));
     }
 
     @Test

@@ -4,11 +4,10 @@ import com.hinal.taskmanagementapi.dto.CreateTaskRequest;
 import com.hinal.taskmanagementapi.dto.ReplaceTaskRequest;
 import com.hinal.taskmanagementapi.dto.TaskResponse;
 import com.hinal.taskmanagementapi.entity.Task;
+import com.hinal.taskmanagementapi.exception.TaskNotFoundException;
 import com.hinal.taskmanagementapi.repository.TaskRepository;
 import java.util.List;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TaskService {
@@ -56,8 +55,7 @@ public class TaskService {
 
     private Task findTask(Long id) {
         return taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
     private static TaskResponse toResponse(Task task) {
