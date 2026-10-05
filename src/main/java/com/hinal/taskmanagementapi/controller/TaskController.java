@@ -5,6 +5,8 @@ import com.hinal.taskmanagementapi.dto.ReplaceTaskRequest;
 import com.hinal.taskmanagementapi.dto.TaskResponse;
 import com.hinal.taskmanagementapi.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +31,10 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request) {
-        TaskResponse createdTask = taskService.createTask(request);
+    public ResponseEntity<TaskResponse> createTask(
+            @AuthenticationPrincipal UserDetails principal,
+            @Valid @RequestBody CreateTaskRequest request) {
+        TaskResponse createdTask = taskService.createTask(principal.getUsername(), request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdTask.id())
@@ -39,24 +43,28 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> getTasks() {
-        return taskService.getTasks();
+    public List<TaskResponse> getTasks(@AuthenticationPrincipal UserDetails principal) {
+        return taskService.getTasks(principal.getUsername());
     }
 
     @GetMapping("/{id}")
-    public TaskResponse getTask(@PathVariable Long id) {
-        return taskService.getTask(id);
+    public TaskResponse getTask(
+            @AuthenticationPrincipal UserDetails principal, @PathVariable Long id) {
+        return taskService.getTask(principal.getUsername(), id);
     }
 
     @PutMapping("/{id}")
     public TaskResponse replaceTask(
-            @PathVariable Long id, @Valid @RequestBody ReplaceTaskRequest request) {
-        return taskService.replaceTask(id, request);
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long id,
+            @Valid @RequestBody ReplaceTaskRequest request) {
+        return taskService.replaceTask(principal.getUsername(), id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
+    public ResponseEntity<Void> deleteTask(
+            @AuthenticationPrincipal UserDetails principal, @PathVariable Long id) {
+        taskService.deleteTask(principal.getUsername(), id);
         return ResponseEntity.noContent().build();
     }
 }
