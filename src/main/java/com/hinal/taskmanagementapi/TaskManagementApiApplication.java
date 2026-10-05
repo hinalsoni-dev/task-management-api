@@ -1,4 +1,4 @@
-package com.hinal.task_management_api;
+package com.hinal.taskmanagementapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

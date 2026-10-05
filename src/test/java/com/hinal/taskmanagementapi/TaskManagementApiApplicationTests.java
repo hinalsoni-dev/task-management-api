@@ -1,4 +1,4 @@
-package com.hinal.task_management_api;
+package com.hinal.taskmanagementapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
